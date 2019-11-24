@@ -307,8 +307,13 @@ class SolveSpaceDistributedIntegralSystemTester(AbstractTester):
         def g(x: float, t: float) -> float:
             return 1.0
 
-        us_list = [1.0, 1.0, 1.0, 1.0]
-        xts_list = [(0.0, 0.0), (0.0, 1.0), (1.0, 0.0), (1.0, 1.0)]
+        us_list = [1.0 for _ in range(4)]
+
+        xts_list = [
+            (0.0, 0.0), (0.0, 1.0),
+            (1.0, 0.0), (1.0, 1.0),
+        ]
+
         a, b, T = 0.0, 1.0, 1.0
 
         def desired(x: float, t: float) -> float:
@@ -329,8 +334,11 @@ class SolveSpaceDistributedIntegralSystemTester(AbstractTester):
             return 1.0
     
         xyts_list = [
-            (0.0, 0.0, 0.0), (0.0, 0.0, 1.0), (0.0, 1.0, 0.0), (0.0, 1.0, 1.0),
-            (1.0, 0.0, 0.0), (1.0, 0.0, 1.0), (1.0, 1.0, 0.0), (1.0, 1.0, 1.0),
+            (0.0, 0.0, 0.0), (0.0, 0.0, 1.0),
+            (0.0, 1.0, 0.0), (0.0, 1.0, 1.0),
+
+            (1.0, 0.0, 0.0), (1.0, 0.0, 1.0),
+            (1.0, 1.0, 0.0), (1.0, 1.0, 1.0),
         ]
     
         a, b, c, d, T = 0.0, 1.0, 0.0, 1.0, 1.0
@@ -350,11 +358,14 @@ class SolveSpaceDistributedIntegralSystemTester(AbstractTester):
         def g(x: float, y: float, t: float) -> float:
             return 1.0
 
-        us_list = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+        us_list = [1.0 for _ in range(8)]
 
         xyts_list = [
-            (0.0, 0.0, 0.0), (0.0, 0.0, 1.0), (0.0, 1.0, 0.0), (0.0, 1.0, 1.0),
-            (1.0, 0.0, 0.0), (1.0, 0.0, 1.0), (1.0, 1.0, 0.0), (1.0, 1.0, 1.0),
+            (0.0, 0.0, 0.0), (0.0, 0.0, 1.0),
+            (0.0, 1.0, 0.0), (0.0, 1.0, 1.0),
+            
+            (1.0, 0.0, 0.0), (1.0, 0.0, 1.0),
+            (1.0, 1.0, 0.0), (1.0, 1.0, 1.0),
         ]
 
         a, b, c, d, T = 0.0, 1.0, 0.0, 1.0, 1.0
@@ -379,7 +390,11 @@ class SolveSpaceDistributedFunctionalSystemTester(AbstractTester):
         def u(x: float, t: float) -> float:
             return 1.0
 
-        xts_list = [(0.0, 0.0), (0.0, 1.0), (1.0, 0.0), (1.0, 1.0)]
+        xts_list = [
+            (0.0, 0.0), (0.0, 1.0),
+            (1.0, 0.0), (1.0, 1.0),
+        ]
+
         a, b, T = 0.0, 1.0, 1.0
         desired = np.array([[0.25] for _ in range(4)])
 
@@ -397,8 +412,11 @@ class SolveSpaceDistributedFunctionalSystemTester(AbstractTester):
             return 1.0
 
         xyts_list = [
-            (0.0, 0.0, 0.0), (0.0, 0.0, 1.0), (0.0, 1.0, 0.0), (0.0, 1.0, 1.0),
-            (1.0, 0.0, 0.0), (1.0, 0.0, 1.0), (1.0, 1.0, 0.0), (1.0, 1.0, 1.0),
+            (0.0, 0.0, 0.0), (0.0, 0.0, 1.0),
+            (0.0, 1.0, 0.0), (0.0, 1.0, 1.0),
+
+            (1.0, 0.0, 0.0), (1.0, 0.0, 1.0),
+            (1.0, 1.0, 0.0), (1.0, 1.0, 1.0),
         ]
 
         a, b, c, d, T = 0.0, 1.0, 0.0, 1.0, 1.0

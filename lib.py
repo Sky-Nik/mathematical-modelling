@@ -475,6 +475,7 @@ def solve_1d_discrete_observations_discrete_modelling(
     vec_f = np.linalg.pinv(A) * vec_u
 
     len0, lenGamma = len(model_x0s_list), len(model_xtGammas_list)
+
     vec_f0, vec_fGamma = vec_f[:len0], vec_f[-lenGamma:]
 
     def u_0(x: float, t: float) -> float:
@@ -574,6 +575,7 @@ def solve_2d_discrete_observations_discrete_modelling(
     vec_f = np.linalg.pinv(A) * vec_u
 
     len0, lenGamma = len(model_xy0s_list), len(model_xytGammas_list)
+
     vec_f0, vec_fGamma = vec_f[:len0], vec_f[-lenGamma:]
 
     def u_0(x: float, y: float, t: float) -> float:
