@@ -24,7 +24,7 @@ class SolveLinearSystemTester(AbstractTester):
         np.testing.assert_almost_equal(actual, desired)
 
     @staticmethod
-    def test_antidiagonal():
+    def test_anti_diagonal():
         a = np.matrix([[0, 1], [1, 0]])
         b = np.array([[1], [2]])
         desired = np.array([[2], [1]])
@@ -252,14 +252,14 @@ class SolveTimeDistributedLinearSystemTester(AbstractTester):
 class SolveIntegralLinearSystemTester(AbstractTester):
     @staticmethod
     def test_simple():
-        def a(t: float) -> np.matrix:
-            return np.matrix([[t, 2 * t], [3 * t, 4 * t]])
+        def a(time: float) -> np.matrix:
+            return np.matrix([[time, 2 * time], [3 * time, 4 * time]])
 
         b = np.array([[1], [2]])
         T = 1.0
 
-        def desired(t: float) -> np.matrix:
-            return np.matrix([[0], [1.5 * t]])
+        def desired(time: float) -> np.matrix:
+            return np.matrix([[0], [1.5 * time]])
 
         actual = lib.solve_integral_system(a, b, T)
         for t in np.linspace(0.0, 1.0, 101):
@@ -410,13 +410,155 @@ class SolveSpaceDistributedFunctionalSystemTester(AbstractTester):
         np.testing.assert_almost_equal(desired, actual)
 
 
+class SolveDiscreteObservationsDiscreteModellingTester(AbstractTester):
+    @staticmethod
+    def test_1d_simple():
+        cond_x0s_list = [0.0, 1.0]
+
+        cond_xtGammas_list = [
+            (0.0, 0.5), (0.0, 1.0),
+            (1.0, 0.5), (1.0, 1.0),
+        ]
+
+        cond_f0s_list = [1.0, 1.0]
+
+        cond_fGammas_list = [
+            1.0, 1.0,
+            1.0, 1.0,
+        ]
+
+        model_xtInftys_list = [
+            (0.0, 0.0), (0.5, 0.0), (1.0, 0.0),
+            (0.0, 0.5), (0.5, 0.5), (1.0, 0.5),
+            (0.0, 1.0), (0.5, 1.0), (1.0, 1.0),
+        ]
+
+        model_x0s_list = [0.0, 0.5, 1.0]
+
+        model_xtGammas_list = [
+            (0.0, 0.0), (1.0, 0.0),
+            (0.0, 0.5), (1.0, 0.5),
+            (0.0, 1.0), (1.0, 1.0),
+        ]
+        
+        def f(x: float, t: float) -> float:
+            return 1.0
+
+        def g(x: float, t: float) -> float:
+            return 1.0
+
+        def desired(x: float, t: float) -> float:
+            return 1.0
+
+        actual = lib.solve_1d_discrete_observations_discrete_modelling(
+            cond_x0s_list, cond_xtGammas_list, cond_f0s_list, cond_fGammas_list,
+            model_xtInftys_list, model_x0s_list, model_xtGammas_list, f, g)
+
+        xts_list = [
+            (0.0, 0.0), (0.5, 0.0), (1.0, 0.0),
+            (0.0, 0.5), (0.5, 0.5), (1.0, 0.5),
+            (0.0, 1.0), (0.5, 1.0), (1.0, 1.0),
+        ]
+
+        for x_i, t_i in xts_list:
+            np.testing.assert_almost_equal(
+                desired(x_i, t_i), actual(x_i, t_i))
+
+    @staticmethod
+    def test_2d_simple():
+        cond_xy0s_list = [
+            (0.0, 0.0), (0.0, 1.0),
+            (1.0, 0.0), (1.0, 1.0),
+        ]
+        
+        cond_xytGammas_list = [
+            (0.0, 0.0, 0.5), (0.0, 1.0, 0.5),
+            (1.0, 0.0, 0.5), (1.0, 1.0, 0.5),
+            
+            (0.0, 0.0, 1.0), (0.0, 1.0, 1.0),
+            (1.0, 0.0, 1.0), (1.0, 1.0, 1.0),
+        ]
+        
+        cond_f0s_list = [
+            1.0, 1.0,
+            1.0, 1.0,
+        ]
+        
+        cond_fGammas_list = [
+            1.0, 1.0,
+            1.0, 1.0,
+
+            1.0, 1.0,
+            1.0, 1.0,
+        ]
+
+        model_xytInftys_list = [
+            (0.0, 0.0, 0.0), (0.5, 0.0, 0.0), (1.0, 0.0, 0.0),
+            (0.0, 0.0, 0.5), (0.5, 0.0, 0.5), (1.0, 0.0, 0.5),
+            (0.0, 0.0, 1.0), (0.5, 0.0, 1.0), (1.0, 0.0, 1.0),
+
+            (0.0, 0.5, 0.0), (0.5, 0.5, 0.0), (1.0, 0.5, 0.0),
+            (0.0, 0.5, 0.5), (0.5, 0.5, 0.5), (1.0, 0.5, 0.5),
+            (0.0, 0.5, 1.0), (0.5, 0.5, 1.0), (1.0, 0.5, 1.0),
+
+            (0.0, 1.0, 0.0), (0.5, 1.0, 0.0), (1.0, 1.0, 0.0),
+            (0.0, 1.0, 0.5), (0.5, 1.0, 0.5), (1.0, 1.0, 0.5),
+            (0.0, 1.0, 1.0), (0.5, 1.0, 1.0), (1.0, 1.0, 1.0),
+        ]
+
+        model_xy0s_list = [
+            (0.0, 0.0), (0.5, 0.0), (1.0, 0.0),
+            (0.0, 0.5), (0.5, 0.5), (1.0, 0.5),
+            (0.0, 1.0), (0.5, 1.0), (1.0, 1.0),
+        ]
+        
+        model_xytGammas_list = [
+            (0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 0.0, 0.5),
+            (1.0, 0.0, 0.5), (0.0, 0.0, 1.0), (1.0, 0.0, 1.0),
+
+            (0.0, 1.0, 0.0), (1.0, 1.0, 0.0), (0.0, 1.0, 0.5),
+            (1.0, 1.0, 0.5), (0.0, 1.0, 1.0), (1.0, 1.0, 1.0),
+        ]
+        
+        def f(x: float, y: float, t: float) -> float:
+            return 1.0
+
+        def g(x: float, y: float, t: float) -> float:
+            return 1.0
+
+        def desired(x: float, y: float, t: float) -> float:
+            return 1.0
+
+        actual = lib.solve_2d_discrete_observations_discrete_modelling(
+            cond_xy0s_list, cond_xytGammas_list, cond_f0s_list, cond_fGammas_list,
+            model_xytInftys_list, model_xy0s_list, model_xytGammas_list, f, g)
+
+        xyts_list = [
+            (0.0, 0.0, 0.0), (0.5, 0.0, 0.0), (1.0, 0.0, 0.0),
+            (0.0, 0.0, 0.5), (0.5, 0.0, 0.5), (1.0, 0.0, 0.5),
+            (0.0, 0.0, 1.0), (0.5, 0.0, 1.0), (1.0, 0.0, 1.0),
+
+            (0.0, 0.5, 0.0), (0.5, 0.5, 0.0), (1.0, 0.5, 0.0),
+            (0.0, 0.5, 0.5), (0.5, 0.5, 0.5), (1.0, 0.5, 0.5),
+            (0.0, 0.5, 1.0), (0.5, 0.5, 1.0), (1.0, 0.5, 1.0),
+
+            (0.0, 1.0, 0.0), (0.5, 1.0, 0.0), (1.0, 1.0, 0.0),
+            (0.0, 1.0, 0.5), (0.5, 1.0, 0.5), (1.0, 1.0, 0.5),
+            (0.0, 1.0, 1.0), (0.5, 1.0, 1.0), (1.0, 1.0, 1.0),
+        ]
+
+        for x_i, y_i, t_i in xyts_list:
+            np.testing.assert_almost_equal(
+                desired(x_i, y_i, t_i), actual(x_i, y_i, t_i))
+
+
 def timed_wrapper(to_wrap):
     @functools.wraps(to_wrap)
     def wrapped(*args, **kwargs):
         start_time = datetime.datetime.now()
         to_wrap(*args, **kwargs)
         time_taken = datetime.datetime.now() - start_time
-        print(f"Tests took {time_taken.total_seconds():0.6f} seconds.")
+        print(f"Tests took {time_taken.total_seconds():0.3f} seconds.")
 
     return wrapped
 
