@@ -19,24 +19,30 @@ class SolveLinearSystemTester(AbstractTester):
     def test_diagonal():
         a = np.matrix([[1, 0], [0, 1]])
         b = np.array([[1], [2]])
+
         desired = np.array([[1], [2]])
         actual = lib.solve_system(a, b)
+
         np.testing.assert_almost_equal(actual, desired)
 
     @staticmethod
     def test_anti_diagonal():
         a = np.matrix([[0, 1], [1, 0]])
         b = np.array([[1], [2]])
+
         desired = np.array([[2], [1]])
         actual = lib.solve_system(a, b)
+
         np.testing.assert_almost_equal(actual, desired)
 
     @staticmethod
     def test_pseudo():
         a = np.matrix([[1, 2], [1, 3], [1, 5]])
         b = np.array([[1], [2], [3]])
+
         desired = np.array([[-1/7], [9/14]])
         actual = lib.solve_system(a, b)
+
         np.testing.assert_almost_equal(actual, desired)
 
 
@@ -49,8 +55,10 @@ class SolveSummedLinearSystemTester(AbstractTester):
         ]
 
         b = np.array([[1], [2], [3], [4]])
+
         desired = [np.array([[1], [2]]), np.array([[3], [4]])]
         actual = lib.solve_summed_system(as_list, b)
+
         for actual_i, desired_i in zip(actual, desired):
             np.testing.assert_almost_equal(actual_i, desired_i)
 
@@ -65,6 +73,7 @@ class SolveSummedLinearSystemTester(AbstractTester):
         ]
 
         actual = lib.solve_summed_system(as_list, b)
+
         for actual_i, desired_i in zip(actual, desired):
             np.testing.assert_almost_equal(actual_i, desired_i, 6)
 
@@ -76,8 +85,10 @@ class SolveSummedLinearSystemTester(AbstractTester):
         ]
 
         b = np.array([[5], [8], [13], [21], [34]])
+
         desired = [np.array([[0.4], [12.2]]), np.array([[-3.8], [29.4]])]
         actual = lib.solve_summed_system(as_list, b)
+
         for actual_i, desired_i in zip(actual, desired):
             np.testing.assert_almost_equal(actual_i, desired_i)
 
@@ -94,8 +105,10 @@ class SolveTimeSummedLinearSystemTester(AbstractTester):
             }[t_i]
 
         b = np.array([[1], [2], [3], [4]])
+
         desired = [np.array([[1], [2]]), np.array([[3], [4]])]
         actual = lib.solve_time_summed_system(a, b, t)
+
         for actual_i, desired_i in zip(actual, desired):
             np.testing.assert_almost_equal(actual_i, desired_i)
 
@@ -117,6 +130,7 @@ class SolveTimeSummedLinearSystemTester(AbstractTester):
         ]
 
         actual = lib.solve_time_summed_system(a, b, t)
+
         for actual_i, desired_i in zip(actual, desired):
             np.testing.assert_almost_equal(actual_i, desired_i, 6)
 
@@ -131,8 +145,10 @@ class SolveTimeSummedLinearSystemTester(AbstractTester):
             }[t_i]
 
         b = np.array([[5], [8], [13], [21], [34]])
+
         desired = [np.array([[0.4], [12.2]]), np.array([[-3.8], [29.4]])]
         actual = lib.solve_time_summed_system(a, b, t)
+
         for actual_i, desired_i in zip(actual, desired):
             np.testing.assert_almost_equal(actual_i, desired_i)
 
@@ -152,6 +168,7 @@ class SolveDistributedLinearSystemTester(AbstractTester):
 
         desired = np.array([[2], [3]])
         actual = lib.solve_distributed_system(as_list, bs_list)
+
         np.testing.assert_almost_equal(actual, desired)
 
     @staticmethod
@@ -168,6 +185,7 @@ class SolveDistributedLinearSystemTester(AbstractTester):
 
         desired = np.array([[2], [3]])
         actual = lib.solve_distributed_system(as_list, bs_list)
+
         np.testing.assert_almost_equal(actual, desired)
 
     @staticmethod
@@ -184,6 +202,7 @@ class SolveDistributedLinearSystemTester(AbstractTester):
 
         desired = np.array([[5], [4]])
         actual = lib.solve_distributed_system(as_list, bs_list)
+
         np.testing.assert_almost_equal(actual, desired)
 
 
@@ -206,6 +225,7 @@ class SolveTimeDistributedLinearSystemTester(AbstractTester):
 
         desired = np.array([[2], [3]])
         actual = lib.solve_time_distributed_system(a, b, t)
+
         np.testing.assert_almost_equal(actual, desired)
 
     @staticmethod
@@ -226,6 +246,7 @@ class SolveTimeDistributedLinearSystemTester(AbstractTester):
 
         desired = np.array([[2], [3]])
         actual = lib.solve_time_distributed_system(a, b, t)
+
         np.testing.assert_almost_equal(actual, desired)
 
     @staticmethod
@@ -246,6 +267,7 @@ class SolveTimeDistributedLinearSystemTester(AbstractTester):
 
         desired = np.array([[5], [4]])
         actual = lib.solve_time_distributed_system(a, b, t)
+
         np.testing.assert_almost_equal(actual, desired)
 
 
@@ -276,8 +298,10 @@ class SolveFunctionalLinearSystemTester(AbstractTester):
             return np.matrix([[t], [2 * t]])
 
         T = 1.0
+
         desired = np.array([[0], [0.5]])
         actual = lib.solve_functional_system(a, b, T)
+
         np.testing.assert_almost_equal(actual, desired)
 
 
@@ -296,8 +320,7 @@ class SolveSpaceDistributedIntegralSystemTester(AbstractTester):
         def desired(x: float, t: float) -> float:
             return 1.0
     
-        actual = lib.solve_1d_space_distributed_integral_system_ufunc(
-            g, u, xts_list, a, b, T)
+        actual = lib.solve_1d_space_distributed_integral_system_ufunc(g, u, xts_list, a, b, T)
     
         for x_i, t_i in xts_list:
             np.testing.assert_almost_equal(desired(x_i, t_i), actual(x_i, t_i))
@@ -319,8 +342,7 @@ class SolveSpaceDistributedIntegralSystemTester(AbstractTester):
         def desired(x: float, t: float) -> float:
             return 1.0
 
-        actual = lib.solve_1d_space_distributed_integral_system(
-            g, us_list, xts_list, a, b, T)
+        actual = lib.solve_1d_space_distributed_integral_system(g, us_list, xts_list, a, b, T)
 
         for x_i, t_i in xts_list:
             np.testing.assert_almost_equal(desired(x_i, t_i), actual(x_i, t_i))
@@ -346,12 +368,10 @@ class SolveSpaceDistributedIntegralSystemTester(AbstractTester):
         def desired(x: float, y: float, t: float) -> float:
             return 1.0
     
-        actual = lib.solve_2d_space_distributed_integral_system_ufunc(
-            g, u, xyts_list, a, b, c, d, T)
+        actual = lib.solve_2d_space_distributed_integral_system_ufunc(g, u, xyts_list, a, b, c, d, T)
     
         for x_i, y_i, t_i in xyts_list:
-            np.testing.assert_almost_equal(
-                desired(x_i, y_i, t_i), actual(x_i, y_i, t_i))
+            np.testing.assert_almost_equal(desired(x_i, y_i, t_i), actual(x_i, y_i, t_i))
 
     @staticmethod
     def test_2d_simple():
@@ -373,12 +393,10 @@ class SolveSpaceDistributedIntegralSystemTester(AbstractTester):
         def desired(x: float, y: float, t: float) -> float:
             return 1.0
 
-        actual = lib.solve_2d_space_distributed_integral_system(
-            g, us_list, xyts_list, a, b, c, d, T)
+        actual = lib.solve_2d_space_distributed_integral_system(g, us_list, xyts_list, a, b, c, d, T)
 
         for x_i, y_i, t_i in xyts_list:
-            np.testing.assert_almost_equal(
-                desired(x_i, y_i, t_i), actual(x_i, y_i, t_i))
+            np.testing.assert_almost_equal(desired(x_i, y_i, t_i), actual(x_i, y_i, t_i))
 
 
 class SolveSpaceDistributedFunctionalSystemTester(AbstractTester):
@@ -396,10 +414,10 @@ class SolveSpaceDistributedFunctionalSystemTester(AbstractTester):
         ]
 
         a, b, T = 0.0, 1.0, 1.0
+
         desired = np.array([[0.25] for _ in range(4)])
 
-        actual = lib.solve_1d_space_distributed_functional_system(
-            g, u, xts_list, a, b, T)
+        actual = lib.solve_1d_space_distributed_functional_system(g, u, xts_list, a, b, T)
 
         np.testing.assert_almost_equal(desired, actual)
 
@@ -420,10 +438,10 @@ class SolveSpaceDistributedFunctionalSystemTester(AbstractTester):
         ]
 
         a, b, c, d, T = 0.0, 1.0, 0.0, 1.0, 1.0
+
         desired = np.array([[0.125] for _ in range(8)])
 
-        actual = lib.solve_2d_space_distributed_functional_system(
-            g, u, xyts_list, a, b, c, d, T)
+        actual = lib.solve_2d_space_distributed_functional_system(g, u, xyts_list, a, b, c, d, T)
 
         np.testing.assert_almost_equal(desired, actual)
 
@@ -479,8 +497,7 @@ class SolveDiscreteObservationsDiscreteModellingTester(AbstractTester):
         ]
 
         for x_i, t_i in xts_list:
-            np.testing.assert_almost_equal(
-                desired(x_i, t_i), actual(x_i, t_i))
+            np.testing.assert_almost_equal(desired(x_i, t_i), actual(x_i, t_i))
 
     @staticmethod
     def test_2d_simple():
@@ -566,8 +583,7 @@ class SolveDiscreteObservationsDiscreteModellingTester(AbstractTester):
         ]
 
         for x_i, y_i, t_i in xyts_list:
-            np.testing.assert_almost_equal(
-                desired(x_i, y_i, t_i), actual(x_i, y_i, t_i))
+            np.testing.assert_almost_equal(desired(x_i, y_i, t_i), actual(x_i, y_i, t_i))
 
 
 def timed_wrapper(to_wrap):
