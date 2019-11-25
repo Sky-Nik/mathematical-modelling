@@ -412,7 +412,7 @@ def solve_1d_discrete_observations_discrete_modelling(
         cond_xtGammas_list: tp.List[tp.Tuple[float, float]],
         cond_f0s_list: tp.List[float],
         cond_fGammas_list: tp.List[float],
-        model_xtInftys_list: tp.List[tp.Tuple[float, float]],
+        model_xtInfs_list: tp.List[tp.Tuple[float, float]],
         model_x0s_list: tp.List[float],
         model_xtGammas_list: tp.List[tp.Tuple[float, float]],
         f: tp.Callable[[float, float], float],
@@ -427,7 +427,7 @@ def solve_1d_discrete_observations_discrete_modelling(
         cond_f0_i = u(cond_x0_i, 0)
     :param cond_fGammas_list: list of real values for boundary conditions:
         cond_fGamma_i = u(cond_xGamma_i, cond_tGamma_i)
-    :param model_xtInftys_list: list of modelling space-time points for f_infty
+    :param model_xtInfs_list: list of modelling space-time points for f_infty
     :param model_x0s_list: list of modelling space points for f_0
     :param model_xtGammas_list: list of modelling points space-time for f_Gamma
     :param f: real-valued function of space and time,
@@ -441,8 +441,8 @@ def solve_1d_discrete_observations_discrete_modelling(
 
     def u_infty(x: float, t: float) -> float:
         return sum(
-            g(x - model_xInfty_i, t - model_tInfty_i) * f(model_xInfty_i, model_tInfty_i)
-            for model_xInfty_i, model_tInfty_i in model_xtInftys_list
+            g(x - model_xInf_i, t - model_tInf_i) * f(model_xInf_i, model_tInf_i)
+            for model_xInf_i, model_tInf_i in model_xtInfs_list
         )
 
     vec_u0 = np.array([[
@@ -507,7 +507,7 @@ def solve_2d_discrete_observations_discrete_modelling(
         cond_xytGammas_list: tp.List[tp.Tuple[float, float, float]],
         cond_f0s_list: tp.List[float],
         cond_fGammas_list: tp.List[float],
-        model_xytInftys_list: tp.List[tp.Tuple[float, float, float]],
+        model_xytInfs_list: tp.List[tp.Tuple[float, float, float]],
         model_xy0s_list: tp.List[tp.Tuple[float, float]],
         model_xytGammas_list: tp.List[tp.Tuple[float, float, float]],
         f: tp.Callable[[float, float, float], float],
@@ -522,7 +522,7 @@ def solve_2d_discrete_observations_discrete_modelling(
         cond_f0_i = u(cond_x0_i, cond_y0_i, 0)
     :param cond_fGammas_list: list of real values for boundary conditions:
         cond_fGamma_i = u(cond_xGamma_i, cond_yGamma_i, cond_tGamma_i)
-    :param model_xytInftys_list: list of modelling space-time points for f_infty
+    :param model_xytInfs_list: list of modelling space-time points for f_infty
     :param model_xy0s_list: list of modelling space points for f_0
     :param model_xytGammas_list: list of modelling points space-time for f_Gamma
     :param f: real-valued function of space and time,
@@ -536,9 +536,9 @@ def solve_2d_discrete_observations_discrete_modelling(
 
     def u_infty(x: float, y: float, t: float) -> float:
         return sum(
-            g(x - model_xInfty_i, y - model_yInfty_i, t - model_tInfty_i) *
-            f(model_xInfty_i, model_yInfty_i, model_tInfty_i)
-            for model_xInfty_i, model_yInfty_i, model_tInfty_i in model_xytInftys_list
+            g(x - model_xInf_i, y - model_yInf_i, t - model_tInf_i) *
+            f(model_xInf_i, model_yInf_i, model_tInf_i)
+            for model_xInf_i, model_yInf_i, model_tInf_i in model_xytInfs_list
         )
 
     vec_u0 = np.array([[
@@ -575,7 +575,10 @@ def solve_2d_discrete_observations_discrete_modelling(
         cond_xytGamma_i[2] - model_xytGamma_i[2],
     ) for model_xytGamma_i in model_xytGammas_list] for cond_xytGamma_i in cond_xytGammas_list])
 
-    A = np.vstack((np.hstack((A11, A12)), np.hstack((A21, A22))))
+    A = np.vstack((
+        np.hstack((A11, A12)),
+        np.hstack((A21, A22)),
+    ))
 
     vec_f = np.linalg.pinv(A) * vec_u
 
@@ -636,7 +639,7 @@ def solve_1d_discrete_observations_continuous_modelling(
 
     def u_infty(x: float, t: float) -> float:
         return integrate.dblquad(
-            lambda t_other, x_other: g(x - x_other, t - t_other) * f(x_other, t_other), a, b, 0, T
+            lambda t_, x_: g(x - x_, t - t_) * f(x_, t_), a, b, 0, T
         )[0]
 
     vec_u0 = np.array([[
@@ -681,29 +684,29 @@ def solve_1d_discrete_observations_continuous_modelling(
 
     len0, lenGamma = len(cond_x0s_list), len(cond_xtGammas_list)
 
-    P11 = np.matrix([[
+    P11 = np.matrix([[(
         integrate.quad(lambda x: A11(x)[i] * A11(x)[j], a, b)[0] +
         integrate.quad(lambda t: A12(a, t)[i] * A12(a, t)[j], 0, T)[0] +
         integrate.quad(lambda t: A12(b, t)[i] * A12(b, t)[j], 0, T)[0]
-    for j in range(len0)] for i in range(len0)])
+    ) for j in range(len0)] for i in range(len0)])
 
-    P12 = np.matrix([[
+    P12 = np.matrix([[(
         integrate.quad(lambda x: A11(x)[i] * A21(x)[j], a, b)[0] +
         integrate.quad(lambda t: A12(a, t)[i] * A22(a, t)[j], 0, T)[0] +
         integrate.quad(lambda t: A12(b, t)[i] * A22(b, t)[j], 0, T)[0]
-    for j in range(lenGamma)] for i in range(len0)])
+    ) for j in range(lenGamma)] for i in range(len0)])
 
-    P21 = np.matrix([[
+    P21 = np.matrix([[(
         integrate.quad(lambda x: A21(x)[i] * A11(x)[j], a, b)[0] +
         integrate.quad(lambda t: A22(a, t)[i] * A12(a, t)[j], 0, T)[0] +
         integrate.quad(lambda t: A22(b, t)[i] * A12(b, t)[j], 0, T)[0]
-    for j in range(len0)] for i in range(lenGamma)])
+    ) for j in range(len0)] for i in range(lenGamma)])
 
-    P22 = np.matrix([[
+    P22 = np.matrix([[(
         integrate.quad(lambda x: A21(x)[i] * A21(x)[j], a, b)[0] +
         integrate.quad(lambda t: A22(a, t)[i] * A22(a, t)[j], 0, T)[0] +
         integrate.quad(lambda t: A22(b, t)[i] * A22(b, t)[j], 0, T)[0]
-    for j in range(lenGamma)] for i in range(lenGamma)])
+    ) for j in range(lenGamma)] for i in range(lenGamma)])
 
     P = np.vstack((
         np.hstack((P11, P12)),
@@ -721,14 +724,14 @@ def solve_1d_discrete_observations_continuous_modelling(
 
     def u_0(x: float, t: float) -> float:
         return integrate.quad(
-            lambda x_other: g(x - x_other, t - 0.0) * vec_f0(x_other, 0.0), a, b
+            lambda x_: g(x - x_, t - 0.0) * vec_f0(x_, 0.0), a, b
         )[0]
 
     def u_Gamma(x: float, t: float) -> float:
         return integrate.quad(
-            lambda t_other: g(x - a, t - t_other) * vec_fGamma(a, t_other), 0, T
+            lambda t_: g(x - a, t - t_) * vec_fGamma(a, t_), 0, T
         )[0] + integrate.quad(
-            lambda t_other: g(x - b, t - t_other) * vec_fGamma(b, t_other), 0, T
+            lambda t_: g(x - b, t - t_) * vec_fGamma(b, t_), 0, T
         )[0]
 
     def u(x: float, t: float) -> float:
@@ -775,9 +778,7 @@ def solve_2d_discrete_observations_continuous_modelling(
     """
 
     def u_infty(x: float, y: float, t: float) -> float:
-        return integrate.tplquad(lambda t_other, x_other, y_other:
-            g(x - x_other, y - y_other, t - t_other) * f(x_other, y_other, t_other),
-        c, d, a, b, 0, T)[0]
+        return integrate.tplquad(lambda t_, x_, y_: g(x - x_, y - y_, t - t_) * f(x_, y_, t_), c, d, a, b, 0, T)[0]
 
     vec_u0 = np.array([[
         cond_f0_i - u_infty(cond_xy0_i[0], cond_xy0_i[1], 0.0)
@@ -825,37 +826,37 @@ def solve_2d_discrete_observations_continuous_modelling(
 
     len0, lenGamma = len(cond_xy0s_list), len(cond_xytGammas_list)
 
-    P11 = np.matrix([[
+    P11 = np.matrix([[(
         integrate.dblquad(lambda x, y: A11(x, y)[i] * A11(x, y)[j], c, d, a, b)[0] +
         integrate.dblquad(lambda t, y: A12(a, y, t)[i] * A12(a, y, t)[j], c, d, 0, T)[0] +
         integrate.dblquad(lambda t, y: A12(b, y, t)[i] * A12(b, y, t)[j], c, d, 0, T)[0] +
         integrate.dblquad(lambda t, x: A12(x, c, t)[i] * A12(x, c, t)[j], a, b, 0, T)[0] +
         integrate.dblquad(lambda t, x: A12(x, d, t)[i] * A12(x, d, t)[j], a, b, 0, T)[0]
-    for j in range(len0)] for i in range(len0)])
+    ) for j in range(len0)] for i in range(len0)])
 
-    P12 = np.matrix([[
+    P12 = np.matrix([[(
         integrate.dblquad(lambda x, y: A11(x, y)[i] * A21(x, y)[j], c, d, a, b)[0] +
         integrate.dblquad(lambda t, y: A12(a, y, t)[i] * A22(a, y, t)[j], c, d, 0, T)[0] +
         integrate.dblquad(lambda t, y: A12(b, y, t)[i] * A22(b, y, t)[j], c, d, 0, T)[0] +
         integrate.dblquad(lambda t, x: A12(x, c, t)[i] * A22(x, c, t)[j], a, b, 0, T)[0] +
         integrate.dblquad(lambda t, x: A12(x, d, t)[i] * A22(x, d, t)[j], a, b, 0, T)[0]
-    for j in range(lenGamma)] for i in range(len0)])
+    ) for j in range(lenGamma)] for i in range(len0)])
 
-    P21 = np.matrix([[
+    P21 = np.matrix([[(
         integrate.dblquad(lambda x, y: A21(x, y)[i] * A11(x, y)[j], c, d, a, b)[0] +
         integrate.dblquad(lambda t, y: A22(a, y, t)[i] * A12(a, y, t)[j], c, d, 0, T)[0] +
         integrate.dblquad(lambda t, y: A22(b, y, t)[i] * A12(b, y, t)[j], c, d, 0, T)[0] +
         integrate.dblquad(lambda t, x: A22(x, c, t)[i] * A12(x, c, t)[j], a, b, 0, T)[0] +
         integrate.dblquad(lambda t, x: A22(x, d, t)[i] * A12(x, d, t)[j], a, b, 0, T)[0]
-    for j in range(len0)] for i in range(lenGamma)])
+    ) for j in range(len0)] for i in range(lenGamma)])
 
-    P22 = np.matrix([[
+    P22 = np.matrix([[(
         integrate.dblquad(lambda x, y: A21(x, y)[i] * A21(x, y)[j], c, d, a, b)[0] +
         integrate.dblquad(lambda t, y: A22(a, y, t)[i] * A22(a, y, t)[j], c, d, 0, T)[0] +
         integrate.dblquad(lambda t, y: A22(b, y, t)[i] * A22(b, y, t)[j], c, d, 0, T)[0] +
         integrate.dblquad(lambda t, x: A22(x, c, t)[i] * A22(x, c, t)[j], a, b, 0, T)[0] +
         integrate.dblquad(lambda t, x: A22(x, d, t)[i] * A22(x, d, t)[j], a, b, 0, T)[0]
-    for j in range(lenGamma)] for i in range(lenGamma)])
+    ) for j in range(lenGamma)] for i in range(lenGamma)])
 
     P = np.vstack((
         np.hstack((P11, P12)),
@@ -872,20 +873,313 @@ def solve_2d_discrete_observations_continuous_modelling(
         return vec_f(x, y, t)[1]
 
     def u_0(x: float, y: float, t: float) -> float:
-        return integrate.dblquad(lambda x_other, y_other:
-            g(x - x_other, y - y_other, t - 0.0) * vec_f0(x_other, y_other, 0.0),
-        c, d, a, b)[0]
+        return integrate.dblquad(lambda x_, y_: g(x - x_, y - y_, t - 0.0) * vec_f0(x_, y_, 0.0), c, d, a, b)[0]
 
     def u_Gamma(x: float, y: float, t: float) -> float:
-        return integrate.dblquad(lambda t_other, y_other:
-            g(x - a, y - y_other, t - t_other) * vec_fGamma(a, y_other, t_other),
-        c, d, 0, T)[0] + integrate.dblquad(lambda t_other, y_other:
-            g(x - b, y - y_other, t - t_other) * vec_fGamma(b, y_other, t_other),
-        c, d, 0, T)[0] + integrate.dblquad(lambda t_other, x_other:
-            g(x - x_other, y - c, t - t_other) * vec_fGamma(x_other, c, t_other),
-        a, b, 0, T)[0] + integrate.dblquad(lambda t_other, x_other:
-            g(x - x_other, y - d, t - t_other) * vec_fGamma(x_other, d, t_other),
-        a, b, 0, T)[0]
+        return integrate.dblquad(lambda t_, y_: g(x - a, y - y_, t - t_) * vec_fGamma(a, y_, t_), c, d, 0, T)[0] + \
+            integrate.dblquad(lambda t_, y_: g(x - b, y - y_, t - t_) * vec_fGamma(b, y_, t_), c, d, 0, T)[0] + \
+            integrate.dblquad(lambda t_, x_: g(x - x_, y - c, t - t_) * vec_fGamma(x_, c, t_), a, b, 0, T)[0] + \
+            integrate.dblquad(lambda t_, x_: g(x - x_, y - d, t - t_) * vec_fGamma(x_, d, t_), a, b, 0, T)[0]
+
+    def u(x: float, y: float, t: float) -> float:
+        return u_infty(x, y, t) + u_0(x, y, t) + u_Gamma(x, y, t)
+
+    return u
+
+
+# continuous observations discrete modelling functions dimensionality 1
+def solve_1d_continuous_observations_discrete_modelling(
+        cond_f0: tp.Callable[[float], float],
+        cond_fGamma: tp.Callable[[float, float], float],
+        model_xtInfs_list: tp.List[tp.Tuple[float, float]],
+        model_x0s_list: tp.List[float],
+        model_xtGammas_list: tp.List[tp.Tuple[float, float]],
+        a: float,
+        b: float,
+        T: float,
+        f: tp.Callable[[float, float], float],
+        g: tp.Callable[[float, float], float],
+) -> tp.Callable[[float, float], float]:
+    """
+    :param cond_f0: right hand side of the initial conditions u(x, 0) = cond_f0(x)
+    :param cond_fGamma: right hand side of the boundary conditions u(x, t) = cond_fGamma(x, t)
+    :param model_xtInfs_list: list of modelling space-time points for f_infty
+    :param model_x0s_list: list of modelling space points for f_0
+    :param model_xtGammas_list: list of modelling points space-time for f_Gamma
+    :param a: lower bound of the x-domains of g and u
+    :param b: upper bound of the x-domains of g and u
+    :param T: end time
+    :param f: real-valued function of space and time,
+        represents external perturbations in the system.
+    :param g: Green's function of the linear differential operator L
+    :return: real-valued function u of space and time,
+        least squares solution to L u(x, t) = f(x, t)
+        under initial conditions u(x, 0) = cond_f0(x),
+        and boundary conditions u(x, t) = cond_fGamma(x, t).
+    """
+
+    def u_infty(x: float, t: float) -> float:
+        return sum(
+            g(x - model_xInf_i, t - model_tInf_i) * f(model_xInf_i, model_tInf_i)
+            for model_xInf_i, model_tInf_i in model_xtInfs_list
+        )
+
+    def B11(x: float) -> np.array:
+        return np.array([[g(
+            x - model_x0_i,
+            0.0 - 0.0,
+        )] for model_x0_i in model_x0s_list])
+
+    def B12(x: float) -> np.array:
+        return np.array([[g(
+            x - model_xGamma_i,
+            0.0 - model_tGamma_i,
+        )] for model_xGamma_i, model_tGamma_i in model_xtGammas_list])
+
+    def B21(x: float, t: float) -> np.array:
+        return np.array([[g(
+            x - model_x0_i,
+            t - 0.0,
+        )] for model_x0_i in model_x0s_list])
+
+    def B22(x: float, t: float) -> np.array:
+        return np.array([[g(
+            x - model_xGamma_i,
+            t - model_tGamma_i,
+        )] for model_xGamma_i, model_tGamma_i in model_xtGammas_list])
+
+    def B(x: float, t: float) -> np.matrix:
+        return np.vstack((
+            np.hstack((B11(x), B12(x, t))),
+            np.hstack((B21(x), B22(x, t))),
+        ))
+
+    len0, lenGamma = len(model_x0s_list), len(model_xtGammas_list)
+
+    P11 = np.matrix([[(
+        integrate.quad(lambda x: B11(x)[i] * B11(x)[j], a, b)[0] +
+        integrate.quad(lambda t: B21(a, t)[i] * B21(a, t)[j], 0, T)[0] +
+        integrate.quad(lambda t: B21(b, t)[i] * B21(b, t)[j], 0, T)[0]
+    ) for j in range(len0)] for i in range(len0)])
+
+    P12 = np.matrix([[(
+        integrate.quad(lambda x: B11(x)[i] * B12(x)[j], a, b)[0] +
+        integrate.quad(lambda t: B21(a, t)[i] * B22(a, t)[j], 0, T)[0] +
+        integrate.quad(lambda t: B21(b, t)[i] * B22(b, t)[j], 0, T)[0]
+    ) for j in range(lenGamma)] for i in range(len0)])
+
+    P21 = np.matrix([[(
+        integrate.quad(lambda x: B12(x)[i] * B11(x)[j], a, b)[0] +
+        integrate.quad(lambda t: B22(a, t)[i] * B21(a, t)[j], 0, T)[0] +
+        integrate.quad(lambda t: B22(b, t)[i] * B21(b, t)[j], 0, T)[0]
+    ) for j in range(len0)] for i in range(lenGamma)])
+
+    P22 = np.matrix([[(
+        integrate.quad(lambda x: B12(x)[i] * B12(x)[j], a, b)[0] +
+        integrate.quad(lambda t: B22(a, t)[i] * B22(a, t)[j], 0, T)[0] +
+        integrate.quad(lambda t: B22(b, t)[i] * B22(b, t)[j], 0, T)[0]
+    ) for j in range(lenGamma)] for i in range(lenGamma)])
+
+    P = np.vstack((
+        np.hstack((P11, P12)),
+        np.hstack((P21, P22)),
+    ))
+
+    def bar_u0(x: float) -> float:
+        return cond_f0(x) - u_infty(x, 0)
+
+    def bar_uGamma(x: float, t: float) -> float:
+        return cond_fGamma(x, t) - u_infty(x, t)
+
+    b_u1 = np.array([[
+        integrate.quad(lambda x: B11(x)[i] * bar_u0(x), a, b)[0] +
+        integrate.quad(lambda t: B21(a, t)[i] * bar_uGamma(a, t), 0, T)[0] +
+        integrate.quad(lambda t: B21(b, t)[i] * bar_uGamma(b, t), 0, T)[0]
+    ] for i in range(len0)])
+
+    b_u2 = np.array([[
+        integrate.quad(lambda x: B12(x)[i] * bar_u0(x), a, b)[0] +
+        integrate.quad(lambda t: B22(a, t)[i] * bar_uGamma(a, t), 0, T)[0] +
+        integrate.quad(lambda t: B22(b, t)[i] * bar_uGamma(b, t), 0, T)[0]
+    ] for i in range(lenGamma)])
+
+    b_u = np.vstack((b_u1, b_u2))
+
+    vec_f = np.linalg.pinv(P) * b_u
+
+    vec_f0, vec_fGamma = vec_f[:len0], vec_f[-lenGamma:]
+
+    def u_0(x: float, t: float) -> float:
+        s = 0.0
+        for model_x0_i, f0_i in zip(model_x0s_list, vec_f0):
+            s += g(x - model_x0_i, t - 0.0) * float(f0_i)
+        return s
+
+    def u_Gamma(x: float, t: float) -> float:
+        s = 0.0
+        for model_xtGamma_i, fGamma_i in zip(model_xtGammas_list, vec_fGamma):
+            s += g(x - model_xtGamma_i[0], t - model_xtGamma_i[1]) * float(fGamma_i)
+        return s
+
+    def u(x: float, t: float) -> float:
+        return u_infty(x, t) + u_0(x, t) + u_Gamma(x, t)
+
+    return u
+
+
+# continuous observations discrete modelling functions dimensionality 2
+def solve_2d_continuous_observations_discrete_modelling(
+        cond_f0: tp.Callable[[float, float], float],
+        cond_fGamma: tp.Callable[[float, float, float], float],
+        model_xytInfs_list: tp.List[tp.Tuple[float, float, float]],
+        model_xy0s_list: tp.List[tp.Tuple[float, float]],
+        model_xytGammas_list: tp.List[tp.Tuple[float, float, float]],
+        a: float,
+        b: float,
+        c: float,
+        d: float,
+        T: float,
+        f: tp.Callable[[float, float, float], float],
+        g: tp.Callable[[float, float, float], float],
+) -> tp.Callable[[float, float, float], float]:
+    """
+    :param cond_f0: right hand side of the initial conditions u(x, y, 0) = cond_f0(x)
+    :param cond_fGamma: right hand side of the boundary conditions u(x, y, t) = cond_fGamma(x, y, t)
+    :param model_xytInfs_list: list of modelling space-time points for f_infty
+    :param model_xy0s_list: list of modelling space points for f_0
+    :param model_xytGammas_list: list of modelling points space-time for f_Gamma
+    :param a: lower bound of the x-domains of g and u
+    :param b: upper bound of the x-domains of g and u
+    :param c: lower bound of the y-domains of g and u
+    :param d: upper bound of the y-domains of g and u
+    :param T: end time
+    :param f: real-valued function of space and time,
+        represents external perturbations in the system.
+    :param g: Green's function of the linear differential operator L
+    :return: real-valued function u of space and time,
+        least squares solution to L u(x, y, t) = f(x, y, t)
+        under initial conditions u(x, y, 0) = cond_f0(x, y),
+        and boundary conditions u(x, y, t) = cond_fGamma(x, y, t).
+    """
+
+    def u_infty(x: float, y: float, t: float) -> float:
+        return sum(
+            g(x - model_xInf_i, y - model_yInf_i, t - model_tInf_i) * f(model_xInf_i, model_yInf_i, model_tInf_i)
+            for model_xInf_i, model_yInf_i, model_tInf_i in model_xytInfs_list
+        )
+
+    def B11(x: float, y: float) -> np.array:
+        return np.array([[g(
+            x - model_x0_i,
+            y - model_y0_i,
+            0.0 - 0.0,
+        )] for model_x0_i, model_y0_i in model_xy0s_list])
+
+    def B12(x: float, y: float) -> np.array:
+        return np.array([[g(
+            x - model_xGamma_i,
+            y - model_yGamma_i,
+            0.0 - model_tGamma_i,
+        )] for model_xGamma_i, model_yGamma_i, model_tGamma_i in model_xytGammas_list])
+
+    def B21(x: float, y: float, t: float) -> np.array:
+        return np.array([[g(
+            x - model_x0_i,
+            y - model_y0_i,
+            t - 0.0,
+        )] for model_x0_i, model_y0_i in model_xy0s_list])
+
+    def B22(x: float, y: float, t: float) -> np.array:
+        return np.array([[g(
+            x - model_xGamma_i,
+            y - model_yGamma_i,
+            t - model_tGamma_i,
+        )] for model_xGamma_i, model_yGamma_i, model_tGamma_i in model_xytGammas_list])
+
+    def B(x: float, y: float, t: float) -> np.matrix:
+        return np.vstack((
+            np.hstack((B11(x, y), B12(x, y, t))),
+            np.hstack((B21(x, y), B22(x, y, t))),
+        ))
+
+    len0, lenGamma = len(model_xy0s_list), len(model_xytGammas_list)
+
+    P11 = np.matrix([[(
+        integrate.dblquad(lambda x, y: B11(x, y)[i] * B11(x, y)[j], c, d, a, b)[0] +
+        integrate.dblquad(lambda t, y: B21(a, y, t)[i] * B21(a, y, t)[j], c, d, 0, T)[0] +
+        integrate.dblquad(lambda t, y: B21(b, y, t)[i] * B21(b, y, t)[j], c, d, 0, T)[0] +
+        integrate.dblquad(lambda t, x: B21(x, c, t)[i] * B21(x, c, t)[j], a, b, 0, T)[0] +
+        integrate.dblquad(lambda t, x: B21(x, d, t)[i] * B21(x, d, t)[j], a, b, 0, T)[0]
+    ) for j in range(len0)] for i in range(len0)])
+
+    P12 = np.matrix([[(
+        integrate.dblquad(lambda x, y: B11(x, y)[i] * B12(x, y)[j], c, d, a, b)[0] +
+        integrate.dblquad(lambda t, y: B21(a, y, t)[i] * B22(a, y, t)[j], c, d, 0, T)[0] +
+        integrate.dblquad(lambda t, y: B21(b, y, t)[i] * B22(b, y, t)[j], c, d, 0, T)[0] +
+        integrate.dblquad(lambda t, x: B21(x, c, t)[i] * B22(x, c, t)[j], a, b, 0, T)[0] +
+        integrate.dblquad(lambda t, x: B21(x, d, t)[i] * B22(x, d, t)[j], a, b, 0, T)[0]
+    ) for j in range(lenGamma)] for i in range(len0)])
+
+    P21 = np.matrix([[(
+        integrate.dblquad(lambda x, y: B12(x, y)[i] * B11(x, y)[j], c, d, a, b)[0] +
+        integrate.dblquad(lambda t, y: B22(a, y, t)[i] * B21(a, y, t)[j], c, d, 0, T)[0] +
+        integrate.dblquad(lambda t, y: B22(b, y, t)[i] * B21(b, y, t)[j], c, d, 0, T)[0] +
+        integrate.dblquad(lambda t, x: B22(x, c, t)[i] * B21(x, c, t)[j], a, b, 0, T)[0] +
+        integrate.dblquad(lambda t, x: B22(x, d, t)[i] * B21(x, d, t)[j], a, b, 0, T)[0]
+    ) for j in range(len0)] for i in range(lenGamma)])
+
+    P22 = np.matrix([[(
+        integrate.dblquad(lambda x, y: B12(x, y)[i] * B12(x, y)[j], c, d, a, b)[0] +
+        integrate.dblquad(lambda t, y: B22(a, y, t)[i] * B22(a, y, t)[j], c, d, 0, T)[0] +
+        integrate.dblquad(lambda t, y: B22(b, y, t)[i] * B22(b, y, t)[j], c, d, 0, T)[0] +
+        integrate.dblquad(lambda t, x: B22(x, c, t)[i] * B22(x, c, t)[j], a, b, 0, T)[0] +
+        integrate.dblquad(lambda t, x: B22(x, d, t)[i] * B22(x, d, t)[j], a, b, 0, T)[0]
+    ) for j in range(lenGamma)] for i in range(lenGamma)])
+
+    P = np.vstack((
+        np.hstack((P11, P12)),
+        np.hstack((P21, P22)),
+    ))
+
+    def bar_u0(x: float, y: float) -> float:
+        return cond_f0(x, y) - u_infty(x, y, 0)
+
+    def bar_uGamma(x: float, y: float, t: float) -> float:
+        return cond_fGamma(x, y, t) - u_infty(x, y, t)
+
+    b_u1 = np.array([[
+        integrate.dblquad(lambda x, y: B11(x, y)[i] * bar_u0(x, y), c, d, a, b)[0] +
+        integrate.dblquad(lambda t, y: B21(a, y, t)[i] * bar_uGamma(a, y, t), c, d, 0, T)[0] +
+        integrate.dblquad(lambda t, y: B21(b, y, t)[i] * bar_uGamma(b, y, t), c, d, 0, T)[0] +
+        integrate.dblquad(lambda t, x: B21(x, c, t)[i] * bar_uGamma(x, c, t), a, b, 0, T)[0] +
+        integrate.dblquad(lambda t, x: B21(x, d, t)[i] * bar_uGamma(x, d, t), a, b, 0, T)[0]
+    ] for i in range(len0)])
+
+    b_u2 = np.array([[
+        integrate.dblquad(lambda x, y: B12(x, y)[i] * bar_u0(x, y), c, d, a, b)[0] +
+        integrate.dblquad(lambda t, y: B22(a, y, t)[i] * bar_uGamma(a, y, t), c, d, 0, T)[0] +
+        integrate.dblquad(lambda t, y: B22(b, y, t)[i] * bar_uGamma(b, y, t), c, d, 0, T)[0] +
+        integrate.dblquad(lambda t, x: B22(x, c, t)[i] * bar_uGamma(x, c, t), a, b, 0, T)[0] +
+        integrate.dblquad(lambda t, x: B22(x, d, t)[i] * bar_uGamma(x, d, t), a, b, 0, T)[0]
+    ] for i in range(lenGamma)])
+
+    b_u = np.vstack((b_u1, b_u2))
+
+    vec_f = np.linalg.pinv(P) * b_u
+
+    vec_f0, vec_fGamma = vec_f[:len0], vec_f[-lenGamma:]
+
+    def u_0(x: float, y: float, t: float) -> float:
+        s = 0.0
+        for model_xy0_i, f0_i in zip(model_xy0s_list, vec_f0):
+            s += g(x - model_xy0_i[0], y - model_xy0_i[1], t - 0.0) * float(f0_i)
+        return s
+
+    def u_Gamma(x: float, y: float, t: float) -> float:
+        s = 0.0
+        for model_xytGamma_i, fGamma_i in zip(model_xytGammas_list, vec_fGamma):
+            s += g(x - model_xytGamma_i[0], y - model_xytGamma_i[1], t - model_xytGamma_i[2]) * float(fGamma_i)
+        return s
 
     def u(x: float, y: float, t: float) -> float:
         return u_infty(x, y, t) + u_0(x, y, t) + u_Gamma(x, y, t)

@@ -463,7 +463,7 @@ class SolveDiscreteObservationsDiscreteModellingTester(AbstractTester):
             1.0, 1.0,
         ]
 
-        model_xtInftys_list = [
+        model_xtInfs_list = [
             (0.0, 0.0), (0.5, 0.0), (1.0, 0.0),
             (0.0, 0.5), (0.5, 0.5), (1.0, 0.5),
             (0.0, 1.0), (0.5, 1.0), (1.0, 1.0),
@@ -488,7 +488,7 @@ class SolveDiscreteObservationsDiscreteModellingTester(AbstractTester):
 
         actual = lib.solve_1d_discrete_observations_discrete_modelling(
             cond_x0s_list, cond_xtGammas_list, cond_f0s_list, cond_fGammas_list,
-            model_xtInftys_list, model_x0s_list, model_xtGammas_list, f, g)
+            model_xtInfs_list, model_x0s_list, model_xtGammas_list, f, g)
 
         xts_list = [
             (0.0, 0.0), (0.5, 0.0), (1.0, 0.0),
@@ -514,20 +514,11 @@ class SolveDiscreteObservationsDiscreteModellingTester(AbstractTester):
             (1.0, 0.0, 1.0), (1.0, 1.0, 1.0),
         ]
 
-        cond_f0s_list = [
-            1.0, 1.0,
-            1.0, 1.0,
-        ]
+        cond_f0s_list = [1.0 for _ in range(4)]
 
-        cond_fGammas_list = [
-            1.0, 1.0,
-            1.0, 1.0,
+        cond_fGammas_list = [1.0 for _ in range(8)]
 
-            1.0, 1.0,
-            1.0, 1.0,
-        ]
-
-        model_xytInftys_list = [
+        model_xytInfs_list = [
             (0.0, 0.0, 0.0), (0.5, 0.0, 0.0), (1.0, 0.0, 0.0),
             (0.0, 0.0, 0.5), (0.5, 0.0, 0.5), (1.0, 0.0, 0.5),
             (0.0, 0.0, 1.0), (0.5, 0.0, 1.0), (1.0, 0.0, 1.0),
@@ -548,11 +539,17 @@ class SolveDiscreteObservationsDiscreteModellingTester(AbstractTester):
         ]
 
         model_xytGammas_list = [
-            (0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 0.0, 0.5),
-            (1.0, 0.0, 0.5), (0.0, 0.0, 1.0), (1.0, 0.0, 1.0),
+            (0.0, 0.0, 0.0), (0.0, 0.5, 0.0), (0.0, 1.0, 0.0),
+            (0.0, 0.0, 0.5), (0.0, 0.5, 0.5), (0.0, 1.0, 0.5),
+            (0.0, 0.0, 1.0), (0.0, 0.5, 0.0), (0.0, 1.0, 1.0),
 
-            (0.0, 1.0, 0.0), (1.0, 1.0, 0.0), (0.0, 1.0, 0.5),
-            (1.0, 1.0, 0.5), (0.0, 1.0, 1.0), (1.0, 1.0, 1.0),
+            (0.5, 0.0, 0.0), (0.5, 1.0, 0.0),
+            (0.5, 0.0, 0.5), (0.5, 1.0, 0.5),
+            (0.5, 0.0, 1.0), (0.5, 1.0, 1.0),
+
+            (1.0, 0.0, 0.0), (1.0, 0.5, 0.0), (1.0, 1.0, 0.0),
+            (1.0, 0.0, 0.5), (1.0, 0.5, 0.5), (1.0, 1.0, 0.5),
+            (1.0, 0.0, 1.0), (1.0, 0.5, 0.0), (1.0, 1.0, 1.0),
         ]
 
         def f(x: float, y: float, t: float) -> float:
@@ -566,7 +563,7 @@ class SolveDiscreteObservationsDiscreteModellingTester(AbstractTester):
 
         actual = lib.solve_2d_discrete_observations_discrete_modelling(
             cond_xy0s_list, cond_xytGammas_list, cond_f0s_list, cond_fGammas_list,
-            model_xytInftys_list, model_xy0s_list, model_xytGammas_list, f, g)
+            model_xytInfs_list, model_xy0s_list, model_xytGammas_list, f, g)
 
         xyts_list = [
             (0.0, 0.0, 0.0), (0.5, 0.0, 0.0), (1.0, 0.0, 0.0),
@@ -611,7 +608,7 @@ class SolveDiscreteObservationsContinuousModellingTester(AbstractTester):
         def g(x: float, t: float) -> float:
             return 1.0
 
-        def desired(x: float, t: float) -> float: 
+        def desired(x: float, t: float) -> float:
             return 1.0
 
         actual = lib.solve_1d_discrete_observations_continuous_modelling(
@@ -626,7 +623,7 @@ class SolveDiscreteObservationsContinuousModellingTester(AbstractTester):
         for x_i, t_i in xts_list:
             np.testing.assert_almost_equal(desired(x_i, t_i), actual(x_i, t_i))
 
-    # this test is slow because it involves 52 triple integrations and 135 double integrations
+    # this test involves 52 triple integrations. it is a little bit slow 
     @staticmethod
     def test_2d_simple():
         cond_xy0s_list = [
@@ -657,7 +654,7 @@ class SolveDiscreteObservationsContinuousModellingTester(AbstractTester):
         def g(x: float, y: float, t: float) -> float:
             return 1.0
 
-        def desired(x: float, y: float, t: float) -> float: 
+        def desired(x: float, y: float, t: float) -> float:
             return 1.0
 
         actual = lib.solve_2d_discrete_observations_continuous_modelling(
@@ -671,7 +668,124 @@ class SolveDiscreteObservationsContinuousModellingTester(AbstractTester):
             (0.5, 0.0, 0.0), (0.5, 0.5, 0.0), (0.5, 1.0, 0.0),
             (0.5, 0.0, 0.5), (0.5, 0.5, 0.5), (0.5, 1.0, 0.5),
             (0.5, 0.0, 1.0), (0.5, 0.5, 1.0), (0.5, 1.0, 1.0),
- 
+
+            (1.0, 0.0, 0.0), (1.0, 0.5, 0.0), (1.0, 1.0, 0.0),
+            (1.0, 0.0, 0.5), (1.0, 0.5, 0.5), (1.0, 1.0, 0.5),
+            (1.0, 0.0, 1.0), (1.0, 0.5, 1.0), (1.0, 1.0, 1.0),
+        ]
+
+        for x_i, y_i, t_i in xyts_list:
+            np.testing.assert_almost_equal(desired(x_i, y_i, t_i), actual(x_i, y_i, t_i))
+
+
+class SolveContinuousObservationsDiscreteModellingTester(AbstractTester):
+    @staticmethod
+    def test_1d_simple():
+        def cond_f0(x: float) -> float:
+            return 1.0
+
+        def cond_fGamma(x: float, t: float) -> float:
+            return 1.0
+
+        model_xtInfs_list = [
+            (0.0, 0.0), (0.5, 0.0), (1.0, 0.0),
+            (0.0, 0.5), (0.5, 0.5), (1.0, 0.5),
+            (0.0, 1.0), (0.5, 1.0), (1.0, 1.0),
+        ]
+
+        model_x0s_list = [0.0, 0.5, 1.0]
+
+        model_xtGammas_list = [
+            (0.0, 0.0), (1.0, 0.0),
+            (0.0, 0.5), (1.0, 0.5),
+            (0.0, 1.0), (1.0, 1.0),
+        ]
+
+        a, b, T = 0.0, 1.0, 1.0
+
+        def f(x: float, t: float) -> float:
+            return 1.0
+
+        def g(x: float, t: float) -> float:
+            return 1.0
+
+        def desired(x: float, t: float) -> float:
+            return 1.0
+
+        actual = lib.solve_1d_continuous_observations_discrete_modelling(cond_f0, cond_fGamma,
+            model_xtInfs_list, model_x0s_list, model_xtGammas_list, a, b, T, f, g)
+
+        xts_list = [
+            (0.0, 0.0), (0.5, 0.0), (1.0, 0.0),
+            (0.0, 0.5), (0.5, 0.5), (1.0, 0.5),
+            (0.0, 1.0), (0.5, 1.0), (1.0, 1.0),
+        ]
+
+        for x_i, t_i in xts_list:
+            np.testing.assert_almost_equal(desired(x_i, t_i), actual(x_i, t_i))
+
+    # this test involves 2'310 double integrations. it is a little bit slow
+    @staticmethod
+    def test_2d_simple():
+        def cond_f0(x: float, y: float) -> float:
+            return 1.0
+
+        def cond_fGamma(x: float, y: float, t: float) -> float:
+            return 1.0
+
+        model_xytInfs_list = [
+            (0.0, 0.0, 0.0), (0.0, 0.5, 0.0), (0.0, 1.0, 0.0),
+            (0.0, 0.0, 0.5), (0.0, 0.5, 0.5), (0.0, 1.0, 0.5),
+            (0.0, 0.0, 1.0), (0.0, 0.5, 1.0), (0.0, 1.0, 1.0),
+
+            (0.5, 0.0, 0.0), (0.5, 0.5, 0.0), (0.5, 1.0, 0.0),
+            (0.5, 0.0, 0.5), (0.5, 0.5, 0.5), (0.5, 1.0, 0.5),
+            (0.5, 0.0, 1.0), (0.5, 0.5, 1.0), (0.5, 1.0, 1.0),
+
+            (1.0, 0.0, 0.0), (1.0, 0.5, 0.0), (1.0, 1.0, 0.0),
+            (1.0, 0.0, 0.5), (1.0, 0.5, 0.5), (1.0, 1.0, 0.5),
+            (1.0, 0.0, 1.0), (1.0, 0.5, 1.0), (1.0, 1.0, 1.0),
+        ]
+
+        model_xy0s_list = [
+            (0.0, 0.0), (0.0, 0.5), (0.0, 1.0),
+            (0.5, 0.0), (0.5, 0.5), (0.5, 1.0),
+            (1.0, 0.0), (1.0, 0.5), (1.0, 1.0),
+        ]
+
+        model_xytGammas_list = [
+            (0.0, 0.0, 0.5), (0.0, 0.5, 0.5), (0.0, 1.0, 0.5),
+            (0.5, 0.0, 0.5), (0.5, 1.0, 0.5),
+            (1.0, 0.0, 0.5), (1.0, 0.5, 0.5), (1.0, 1.0, 0.5),
+
+            (0.0, 0.0, 1.0), (0.0, 0.5, 0.0), (0.0, 1.0, 1.0),
+            (0.5, 0.0, 1.0), (0.5, 1.0, 1.0),
+            (1.0, 0.0, 1.0), (1.0, 0.5, 0.0), (1.0, 1.0, 1.0),
+        ]
+
+        a, b, c, d, T = 0.0, 1.0, 0.0, 1.0, 1.0
+
+        def f(x: float, y: float, t: float) -> float:
+            return 1.0
+
+        def g(x: float, y: float, t: float) -> float:
+            return 1.0
+
+        def desired(x: float, y: float,t: float) -> float:
+            return 1.0
+
+        actual = lib.solve_2d_continuous_observations_discrete_modelling(cond_f0, cond_fGamma,
+            model_xytInfs_list, model_xy0s_list, model_xytGammas_list, a, b, c, d, T, f, g)
+
+        xyts_list = [
+            (0.0, 0.0, 0.0), (0.0, 0.5, 0.0), (0.0, 1.0, 0.0),
+            (0.0, 0.0, 0.5), (0.0, 0.5, 0.5), (0.0, 1.0, 0.5),
+            (0.0, 0.0, 1.0), (0.0, 0.5, 1.0), (0.0, 1.0, 1.0),
+
+            (0.5, 0.0, 0.0), (0.5, 0.5, 0.0), (0.5, 1.0, 0.0),
+            (0.5, 0.0, 0.5), (0.5, 0.5, 0.5), (0.5, 1.0, 0.5),
+            (0.5, 0.0, 1.0), (0.5, 0.5, 1.0), (0.5, 1.0, 1.0),
+
             (1.0, 0.0, 0.0), (1.0, 0.5, 0.0), (1.0, 1.0, 0.0),
             (1.0, 0.0, 0.5), (1.0, 0.5, 0.5), (1.0, 1.0, 0.5),
             (1.0, 0.0, 1.0), (1.0, 0.5, 1.0), (1.0, 1.0, 1.0),
