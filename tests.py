@@ -626,6 +626,7 @@ class SolveDiscreteObservationsContinuousModellingTester(AbstractTester):
         for x_i, t_i in xts_list:
             np.testing.assert_almost_equal(desired(x_i, t_i), actual(x_i, t_i))
 
+    # this test is slow because it involves 52 triple integrations and 135 double integrations
     @staticmethod
     def test_2d_simple():
         cond_xy0s_list = [
